@@ -4,7 +4,7 @@ library(OpenML)
 library(BBmisc)
 setOMLConfig(apikey = "1536489644f7a7872e7d0d5c89cb6297")
 datasets = listOMLTasks(tag = "study_14")
-datasets = datasets[1:10, ]
+#datasets = datasets[1:10, ]
 populateOMLCache(task.ids = datasets$task.id)
 oml.tasks = lapply(datasets$task.id, function(x) getOMLTask(task.id = x))
 oml.tasks = setNames(oml.tasks, vcapply(oml.tasks, function(x) x$input$data.set$desc$name))
