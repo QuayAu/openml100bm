@@ -14,25 +14,33 @@ ui <- fluidPage(
    
   # Application title
   titlePanel("OpenML 100 Benchmark"),
+  
+  uiOutput("dataset"),
    
-  # Show a plot of the generated distribution
   mainPanel(
-     tableOutput("bmrtable")
-  ),
-  uiOutput('datasets')
+    DT::dataTableOutput("bmrtable")
+  )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   #setwd("C:\\Users\\ag-compstat\\Desktop\\openml_workshop\\benchmark\\shiny")
    load(file = "../results.RData")
+   library(mlr)
    bmrperf = getBMRAggrPerformances(bmr, as.df = TRUE)
-   # output$bmrtable <- renderTable({
-   #   bmrperf
-   # })
-   output$datasets = renderUI({
-     selectInput('columns2', 'Columns', unique(bmrperf$task.id))
+
+   output$dataset = renderUI({
+     selectInput('ds', 'Dataset', unique(bmrperf$task.id))
    })
+   
+   output$perfmeasure = renderUI({
+     selectInput('perf', 'Performance Measure', getBMRMeasureIds(bmr))
+   })
+   
+   output$bmrtable = DT::renderDataTable({
+     bmrperf[bmrperf$task.id == input$ds, ]
+   })
+    
 }
 
 # Run the application 
