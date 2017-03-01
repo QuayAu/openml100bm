@@ -10,12 +10,14 @@ source("defs.R")
 datasets = listOMLTasks(tag = "study_14")
 #datasets = datasets[1:10, ]
 populateOMLCache(task.ids = datasets$task.id)
-oml.tasks = lapply(datasets$task.id, function(x) getOMLTask(task.id = x))
+oml.tasks = lapply(datasets$task.id, function(x) try(getOMLTask(task.id = x)))
+oml.tasks = oml.tasks[!vlapply(oml.tasks, is.error)]
 oml.tasks = setNames(oml.tasks, vcapply(oml.tasks, function(x) x$input$data.set$desc$name))
 
 # create registry
 unlink("openml100bm", recursive = TRUE)
-reg = makeExperimentRegistry("openml100bm", packages = c("mlr", "parallelMap"), source = "defs.R", seed = 123)
+reg = makeExperimentRegistry("openml100bm", packages = c("OpenML", "mlr", "parallelMap"),
+  source = "defs.R", seed = 123)
 tmpl = "/home/hpc/pr74ze/ri89coc2/lrz_configs/config_files/batchtools/slurm_lmulrz.tmpl"
 reg$cluster.functions = makeClusterFunctionsSlurm(template = tmpl, clusters = "mpp2")
 
@@ -27,10 +29,12 @@ for (tn in names(oml.tasks)) {
 
 # add algorithms
 addAlgorithm(name = "algorithm", fun = function(data, lrn, ...) {
-  learner = LEARNERS[[lrn]]
+  learner = makeRemoveConstantFeaturesWrapper(LEARNERS[[lrn]])
   parallelStartMulticore(10, level = "mlr.resample")
-  runTaskMlr(task = data, learner = learner, measures = MEASURES)
+  run = runTaskMlr(task = data, learner = learner, measures = MEASURES)
+  run.id = try(uploadOMLRun(run, confirm.upload = FALSE, tags = "mlr_defauls_openml100"))
   parallelStop()
+  return(list(run = run, run.id = run.id))
 })
 
 # make algorithm design
