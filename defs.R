@@ -3,7 +3,7 @@ MEASURES = list(acc, mmce)
 
 library(mlr)
 LEARNERS = listLearners("classif", properties = c("multiclass", "prob", "factors"))
-LEARNERS = LEARNERS[LEARNERS$class %in% c("classif.rpart", "classif.OneR"), ]
+#LEARNERS = LEARNERS[LEARNERS$class %in% c("classif.rpart", "classif.OneR"), ]
 LEARNERS = makeLearners(LEARNERS$class, predict.type = "prob")
 
 #alle learner 
