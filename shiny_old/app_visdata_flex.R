@@ -17,7 +17,7 @@ library(shinydashboard)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
-  dashboardHeader(title = "OpenML100 Benchmark"),
+  dashboardHeader(title = "Plot Benchmark Results"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("Choose Columns", tabName = "cols"),
@@ -28,7 +28,6 @@ ui <- dashboardPage(
     tabItems(
       tabItem(tabName = "cols",
         h2("Select the right columns:"),
-        #actionButton("do", "Click Me"),
         uiOutput("datacolumn"),
         uiOutput("perfcolumn"),
         uiOutput("learnercolumn"),
@@ -56,13 +55,6 @@ server <- function(input, output) {
   dataframe = readARFF(file.choose())
   
   #Choose Columns page
-
-
-  # output$value <- renderPrint({
-  #   inFile <- input$file
-  #   print(inFile)
-  #   dataframe = readARFF(inFile$datapath)
-  # })
   
   output$datacolumn = renderUI({
     selectInput('dc', 'data column', colnames(dataframe), selected = FALSE)
@@ -91,16 +83,18 @@ server <- function(input, output) {
   })
   
   output$learner = renderUI({
-    selectInput('lrn', 'learner', unique(dataframe[, input$lc]), selected = unique(dataframe[, input$lc]), multiple = TRUE)
+    selectInput('lrn', 'learner', unique(dataframe[, input$lc]), selected = FALSE, multiple = TRUE)
   })
   
   
   output$plotly = renderPlotly({
     eval(parse(text =  paste0("df = filter(dataframe,", input$dc, "%in% input$ds, ", input$lc, "%in% input$lrn)")))
-   
-    # df = dplyr::filter(dataframe, get(input$dc) %in% input$ds, get(input$lc) %in% input$lrn)
-    p = ggplot(df, aes(x = get(input$pc), y = get(input$dc))) + xlab(input$perf)
-    p = p +  geom_point(aes(colour = get(input$lc)))
+    print(paste0("df = filter(dataframe,", input$dc, "%in% input$ds, ", input$lc, "%in% input$lrn)"))
+    #df = dplyr::filter(dataframe, get(input$dc) %in% input$ds, get(input$lc) %in% input$lrn)
+    #p = ggplot(df, aes(x = get(input$perf), y = get(input$dc))) + xlab(input$perf) + ylab(input$dc)
+    eval(parse(text =  paste0("p = ggplot(df, aes(x =", input$perf, ", y =", input$dc, "))")))
+    #p = p + geom_point(aes(colour = get(input$lc)))
+    eval(parse(text =  paste0("p = p + geom_point(aes(colour = ", input$lc, "))")))
     p = ggplotly(p)
     p
   })
