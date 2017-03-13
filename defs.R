@@ -2,7 +2,7 @@
 MEASURES = list(acc, mmce)
 
 LEARNERS = listLearners("classif", properties = c("twoclass", "multiclass", "prob"), create = TRUE)
-LEARNERS = lapply(LEARNERS, function(lrn) {
+LEARNERS = setNames(lapply(LEARNERS, function(lrn) {
   lrn = setPredictType(lrn, predict.type = "prob")
   if (getLearnerId(lrn) == "classif.xgboost")
     lrn = setHyperPars(lrn, nrounds = 100)
@@ -11,8 +11,7 @@ LEARNERS = lapply(LEARNERS, function(lrn) {
     lrn = makeDummyFeaturesWrapper(lrn)
   # remove almost constant features
   makeRemoveConstantFeaturesWrapper(lrn)
-})
-LEARNERS = vcapply(LEARNERS, getLearnerId)
+}), vcapply(LEARNERS, getLearnerId))
 
 #alle learner
 #nur probabilities
