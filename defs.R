@@ -1,10 +1,18 @@
 #definitions for the benchmark study are saved in this file
 MEASURES = list(acc, mmce)
 
-library(mlr)
-LEARNERS = listLearners("classif", properties = c("twoclass", "multiclass", "prob", "factors"))
-#LEARNERS = LEARNERS[LEARNERS$class %in% c("classif.rpart", "classif.OneR"), ]
-LEARNERS = makeLearners(LEARNERS$class, predict.type = "prob")
+LEARNERS = listLearners("classif", properties = c("twoclass", "multiclass", "prob"), create = TRUE)
+LEARNERS = lapply(LEARNERS, function(lrn) {
+  lrn = setPredictType(lrn, predict.type = "prob")
+  if (getLearnerId(lrn) == "classif.xgboost")
+    lrn = setHyperPars(lrn, nrounds = 100)
+  # add dummy feature wrapper if learner can't handle factors
+  if ("factors" %nin% getLearnerProperties(lrn))
+    lrn = makeDummyFeaturesWrapper(lrn)
+  # remove almost constant features
+  makeRemoveConstantFeaturesWrapper(lrn)
+})
+LEARNERS = vcapply(LEARNERS, getLearnerId)
 
 #alle learner
 #nur probabilities
