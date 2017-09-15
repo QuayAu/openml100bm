@@ -30,7 +30,7 @@ oml.tasks = setNames(bin.tasks, vcapply(bin.tasks, function(x) x$input$data.set$
 # create registry
 unlink("mlr_defaults_openml50", recursive = TRUE)
 reg = makeExperimentRegistry("mlr_defaults_openml50", 
-  packages = c("OpenML", "mlr", "parallelMap"),
+  packages = c("OpenML", "mlr", "parallelMap", "BBmisc"),
   source = "defs.R", seed = 123)
 tmpl = "/home/hpc/pr74ze/ri89coc2/lrz_configs/config_files/batchtools/slurm_lmulrz.tmpl"
 reg$cluster.functions = makeClusterFunctionsSlurm(template = tmpl, clusters = "serial")
